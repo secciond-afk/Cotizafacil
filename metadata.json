@@ -1,0 +1,6 @@
+{
+  "name": "CotizaFácil Pro",
+  "description": "Sistema profesional de cotizaciones con personalización gráfica, exportación a PDF, catálogo de productos y clientes, envío por WhatsApp y correo, y seguimiento con notificaciones.",
+  "requestFramePermissions": ["notifications"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
