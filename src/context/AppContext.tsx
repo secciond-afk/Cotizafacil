@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
-import { Client, Product, Quote, CompanySettings, QuoteStatus, NotificationItem, User, BackupSummary, BackupRestoreMode } from '../types';
-import { initialClients, initialProducts, initialQuotes, initialCompanySettings, createCleanCompanySettings, initialUsers, DEFAULT_LAYOUT_SETTINGS } from '../data/initialData';
+import { Client, Product, Quote, CompanySettings, QuoteStatus, NotificationItem, User, UserPermissions, BackupSummary, BackupRestoreMode } from '../types';
+import { initialClients, initialProducts, initialQuotes, initialCompanySettings, createCleanCompanySettings, initialUsers, DEFAULT_LAYOUT_SETTINGS, DEFAULT_COMMERCIAL_PERMISSIONS } from '../data/initialData';
 import confetti from 'canvas-confetti';
 
 interface AppContextType {
@@ -17,6 +17,8 @@ interface AppContextType {
   updateUser: (id: string, userData: Partial<User>) => void;
   deleteUser: (id: string) => void;
   switchUser: (id: string) => void;
+  toggleUserStatus: (id: string) => void;
+  updateUserPermissions: (id: string, permissions: Partial<UserPermissions>) => void;
 
   // Scoped Data (Only for current user)
   quotes: Quote[];
@@ -116,22 +118,28 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   }, []);
 
-  // 1. Users database state
+  // 1. Users database state: preserves all commercial users created by administrator
   const [users, setUsers] = useState<User[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.USERS);
       if (saved) {
         const parsed: User[] = JSON.parse(saved);
-        // Ensure default users have passwords if missing
-        return parsed.map((u) => {
-          if (!u.password) {
-            if (u.id === 'user-admin' || u.role === 'admin') {
-              return { ...u, username: u.username || 'admin', password: 'admin123' };
-            }
-            return { ...u, username: u.username || u.email.split('@')[0], password: '123456' };
-          }
-          return u;
-        });
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Normalize and preserve every user with password, status, and permissions
+          return parsed.map((u) => {
+            const isAdminUser = u.id === 'user-admin' || u.role === 'admin';
+            return {
+              ...u,
+              username: u.username || (isAdminUser ? 'admin' : (u.email ? u.email.split('@')[0] : 'comercial')),
+              password: u.password || (isAdminUser ? 'admin123' : '123456'),
+              status: u.status || 'active',
+              permissions: {
+                ...DEFAULT_COMMERCIAL_PERMISSIONS,
+                ...(u.permissions || {}),
+              },
+            };
+          });
+        }
       }
       return initialUsers;
     } catch {
@@ -346,30 +354,136 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       console.warn('Solo los administradores pueden crear nuevos usuarios.');
       return currentUser;
     }
+    const cleanEmail = userData.email.trim().toLowerCase();
+    const cleanUsername = (userData.username || userData.email.split('@')[0]).trim().toLowerCase();
     const newId = `user-${Date.now()}`;
     const newUser: User = {
       ...userData,
       id: newId,
-      username: userData.username?.trim().toLowerCase() || userData.email.split('@')[0].toLowerCase(),
-      password: userData.password || '123456',
+      email: cleanEmail,
+      username: cleanUsername,
+      password: userData.password?.trim() || '123456',
+      role: userData.role || 'user',
+      status: userData.status || 'active',
+      permissions: {
+        ...DEFAULT_COMMERCIAL_PERMISSIONS,
+        ...(userData.permissions || {}),
+      },
       createdAt: new Date().toISOString(),
     };
-    setUsers((prev) => [...prev, newUser]);
-    // Automatically set up a clean, blank settings configuration for the new user
-    setUserSettingsMap((prev) => ({
-      ...prev,
-      [newId]: createCleanCompanySettings(newUser),
-    }));
+
+    setUsers((prev) => {
+      // Check if user already exists by email or username
+      const existingIndex = prev.findIndex(
+        (u) =>
+          (u.email && u.email.toLowerCase() === cleanEmail) ||
+          (u.username && u.username.toLowerCase() === cleanUsername)
+      );
+      let nextUsers: User[];
+      if (existingIndex >= 0) {
+        nextUsers = prev.map((u, i) => (i === existingIndex ? { ...u, ...newUser, id: u.id } : u));
+      } else {
+        nextUsers = [...prev, newUser];
+      }
+      try {
+        localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(nextUsers));
+      } catch (e) {
+        console.error('Error saving users to storage:', e);
+      }
+      return nextUsers;
+    });
+
+    // Automatically set up a clean, blank settings configuration for the new commercial user
+    setUserSettingsMap((prev) => {
+      const updatedMap = {
+        ...prev,
+        [newId]: createCleanCompanySettings(newUser),
+      };
+      try {
+        localStorage.setItem(STORAGE_KEYS.USER_SETTINGS, JSON.stringify(updatedMap));
+      } catch (e) {
+        console.error('Error saving user settings:', e);
+      }
+      return updatedMap;
+    });
+
     return newUser;
   };
 
   const updateUser = (id: string, userData: Partial<User>) => {
-    // Non-admin users cannot change other users or escalate their role
+    // Non-admin users cannot change other users or escalate their role/status/permissions
     if (currentUser.role !== 'admin') {
       if (id !== currentUser.id) return;
-      delete userData.role; // prevent role escalation
+      delete userData.role;
+      delete userData.status;
+      delete userData.permissions;
     }
-    setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, ...userData } : u)));
+    setUsers((prev) => {
+      const updated = prev.map((u) => {
+        if (u.id === id) {
+          const mergedPermissions = userData.permissions
+            ? { ...DEFAULT_COMMERCIAL_PERMISSIONS, ...(u.permissions || {}), ...userData.permissions }
+            : u.permissions;
+          return {
+            ...u,
+            ...userData,
+            username: userData.username !== undefined ? userData.username.trim().toLowerCase() : u.username,
+            permissions: mergedPermissions,
+          };
+        }
+        return u;
+      });
+      try {
+        localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updated));
+      } catch (e) {
+        console.error('Error saving updated users to storage:', e);
+      }
+      return updated;
+    });
+  };
+
+  const toggleUserStatus = (id: string) => {
+    if (currentUser.role !== 'admin') return;
+    setUsers((prev) => {
+      const updated = prev.map((u) => {
+        if (u.id === id) {
+          const nextStatus: 'active' | 'inactive' = u.status === 'inactive' ? 'active' : 'inactive';
+          return { ...u, status: nextStatus };
+        }
+        return u;
+      });
+      try {
+        localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updated));
+      } catch (e) {
+        console.error('Error toggling user status:', e);
+      }
+      return updated;
+    });
+  };
+
+  const updateUserPermissions = (id: string, permissions: Partial<UserPermissions>) => {
+    if (currentUser.role !== 'admin') return;
+    setUsers((prev) => {
+      const updated = prev.map((u) => {
+        if (u.id === id) {
+          return {
+            ...u,
+            permissions: {
+              ...DEFAULT_COMMERCIAL_PERMISSIONS,
+              ...(u.permissions || {}),
+              ...permissions,
+            },
+          };
+        }
+        return u;
+      });
+      try {
+        localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updated));
+      } catch (e) {
+        console.error('Error updating user permissions:', e);
+      }
+      return updated;
+    });
   };
 
   const deleteUser = (id: string) => {
@@ -377,7 +491,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       alert('Debe haber al menos un usuario en el sistema.');
       return;
     }
-    setUsers((prev) => prev.filter((u) => u.id !== id));
+    setUsers((prev) => {
+      const updated = prev.filter((u) => u.id !== id);
+      try {
+        localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updated));
+      } catch (e) {
+        console.error('Error saving users after deletion:', e);
+      }
+      return updated;
+    });
     if (currentUserId === id) {
       const remaining = users.filter((u) => u.id !== id);
       setCurrentUserId(remaining[0].id);
@@ -408,7 +530,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return { success: false, message: 'Por favor ingresa tu contraseña.' };
     }
 
-    const matchedUser = users.find((u) => {
+    // Refresh from localStorage to ensure any newly created commercial user is immediately recognized
+    let currentUsersList = users;
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.USERS);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          currentUsersList = parsed;
+        }
+      }
+    } catch {
+      // fallback to state
+    }
+
+    const matchedUser = currentUsersList.find((u) => {
       const uEmail = (u.email || '').toLowerCase();
       const uName = (u.name || '').toLowerCase();
       const uUsername = (u.username || '').toLowerCase();
@@ -419,6 +555,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return { success: false, message: 'No se encontró ninguna cuenta con ese usuario o correo.' };
     }
 
+    // Validate account status configured by admin
+    if (matchedUser.status === 'inactive') {
+      return {
+        success: false,
+        message: 'Tu acceso como usuario comercial ha sido temporalmente desactivado por el administrador. Contacta al administrador para reactivar tu cuenta.',
+      };
+    }
+
     // Verify password (fallback to default admin123 or 123456 if none stored)
     const expectedPassword = matchedUser.password || (matchedUser.role === 'admin' ? 'admin123' : '123456');
     if (cleanPass !== expectedPassword) {
@@ -426,6 +570,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
 
     // Successful login
+    setUsers(currentUsersList);
     setCurrentUserId(matchedUser.id);
     setIsAuthenticated(true);
     try {
@@ -749,6 +894,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const deleteQuote = (id: string) => {
+    if (currentUser.role !== 'admin' && currentUser.permissions?.canDeleteQuotes === false) {
+      alert('Tu usuario comercial no tiene autorización del administrador para eliminar cotizaciones.');
+      return;
+    }
     setAllQuotes((prev) => prev.filter((q) => q.id !== id));
     if (editingQuoteId === id) {
       setEditingQuoteId(null);
@@ -852,11 +1001,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const deleteClient = (id: string) => {
+    if (currentUser.role !== 'admin' && currentUser.permissions?.canDeleteClients === false) {
+      alert('Tu usuario comercial no tiene autorización del administrador para eliminar clientes.');
+      return;
+    }
     setAllClients((prev) => prev.filter((c) => c.id !== id));
   };
 
   // Product actions
   const addProduct = (productData: Omit<Product, 'id' | 'createdAt' | 'userId'>): Product => {
+    if (currentUser.role !== 'admin' && currentUser.permissions?.canManageProducts === false) {
+      alert('Tu usuario comercial no tiene autorización del administrador para crear productos en el catálogo.');
+      throw new Error('Permiso denegado por el administrador');
+    }
     const newProduct: Product = {
       ...productData,
       id: `prod-${Date.now()}`,
@@ -868,12 +1025,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const updateProduct = (id: string, productData: Partial<Product>) => {
+    if (currentUser.role !== 'admin' && currentUser.permissions?.canManageProducts === false) {
+      alert('Tu usuario comercial no tiene autorización del administrador para editar productos.');
+      return;
+    }
     setAllProducts((prev) =>
       prev.map((p) => (p.id === id ? { ...p, ...productData } : p))
     );
   };
 
   const deleteProduct = (id: string) => {
+    if (currentUser.role !== 'admin' && currentUser.permissions?.canManageProducts === false) {
+      alert('Tu usuario comercial no tiene autorización del administrador para eliminar productos.');
+      return;
+    }
     setAllProducts((prev) => prev.filter((p) => p.id !== id));
   };
 
@@ -901,6 +1066,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // Data backup
   const exportBackupJSON = () => {
+    if (currentUser.role !== 'admin' && currentUser.permissions?.canExportData === false) {
+      alert('Tu usuario comercial no tiene autorización del administrador para exportar respaldos.');
+      return;
+    }
     const isAdmin = currentUser.role === 'admin';
     const data = {
       users: isAdmin ? users : [currentUser],
@@ -1262,6 +1431,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         updateUser,
         deleteUser,
         switchUser,
+        toggleUserStatus,
+        updateUserPermissions,
         quotes,
         clients,
         products,

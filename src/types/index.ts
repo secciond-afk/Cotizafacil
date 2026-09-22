@@ -1,5 +1,14 @@
 export type QuoteStatus = 'draft' | 'sent' | 'approved' | 'rejected' | 'expired';
 
+export interface UserPermissions {
+  canManageProducts?: boolean; // Puede crear y editar productos del catálogo
+  canDeleteQuotes?: boolean;   // Puede eliminar cotizaciones
+  canDeleteClients?: boolean;  // Puede eliminar clientes
+  canGiveDiscounts?: boolean;  // Puede aplicar descuentos
+  maxDiscountPercent?: number; // Descuento máximo permitido en % (ej. 20%)
+  canExportData?: boolean;     // Puede exportar copias de respaldo
+}
+
 export interface User {
   id: string;
   name: string;
@@ -7,10 +16,12 @@ export interface User {
   username?: string;
   password?: string;
   role: 'admin' | 'user';
+  status?: 'active' | 'inactive'; // Permite habilitar o deshabilitar el acceso al sistema
   company?: string;
   phone?: string;
   avatar?: string;
   createdAt: string;
+  permissions?: UserPermissions;
 }
 
 export interface Client {

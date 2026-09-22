@@ -12,7 +12,8 @@ import {
   X,
   DollarSign,
   Layers,
-  FilePlus2
+  FilePlus2,
+  Lock
 } from 'lucide-react';
 
 export const ProductsView: React.FC = () => {
@@ -22,7 +23,10 @@ export const ProductsView: React.FC = () => {
     startNewQuote,
     formatCurrency,
     settings,
+    currentUser,
   } = useApp();
+
+  const canManageProducts = currentUser.role === 'admin' || currentUser.permissions?.canManageProducts !== false;
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -82,13 +86,20 @@ export const ProductsView: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={handleCreate}
-          className="px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm shadow-emerald-600/30 transition-all"
-        >
-          <Plus className="w-4 h-4" />
-          + Nuevo Producto / Servicio
-        </button>
+        {canManageProducts ? (
+          <button
+            onClick={handleCreate}
+            className="px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm shadow-emerald-600/30 transition-all cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            + Nuevo Producto / Servicio
+          </button>
+        ) : (
+          <div className="px-4 py-2 rounded-2xl bg-slate-100 border border-slate-200 text-slate-600 text-xs font-semibold flex items-center gap-2">
+            <Lock className="w-3.5 h-3.5 text-slate-500" />
+            <span>Catálogo asignado por el administrador</span>
+          </div>
+        )}
       </div>
 
       {/* Search Toolbar & Category Chips */}
@@ -219,22 +230,24 @@ export const ProductsView: React.FC = () => {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => handleEdit(product)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-                      title="Editar producto"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(product.id, product.name)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                      title="Eliminar producto"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                  {canManageProducts && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => handleEdit(product)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                        title="Editar producto"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(product.id, product.name)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                        title="Eliminar producto"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <h3 className="font-bold text-slate-900 text-base leading-snug">

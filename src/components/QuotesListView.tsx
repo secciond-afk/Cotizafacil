@@ -40,7 +40,10 @@ export const QuotesListView: React.FC = () => {
     formatCurrency,
     selectedQuoteForPrint,
     setSelectedQuoteForPrint,
+    currentUser,
   } = useApp();
+
+  const canDeleteQuotes = currentUser.role === 'admin' || currentUser.permissions?.canDeleteQuotes !== false;
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -478,13 +481,15 @@ export const QuotesListView: React.FC = () => {
                       Editar
                     </button>
 
-                    <button
-                      onClick={() => handleDelete(q.id, q.quoteNumber)}
-                      className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                      title="Eliminar"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    {canDeleteQuotes && (
+                      <button
+                        onClick={() => handleDelete(q.id, q.quoteNumber)}
+                        className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                        title="Eliminar"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

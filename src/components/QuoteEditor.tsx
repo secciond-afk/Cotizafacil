@@ -56,10 +56,15 @@ export const QuoteEditor: React.FC<QuoteEditorProps> = ({ quoteId, onBack }) => 
     clients,
     products,
     settings,
+    currentUser,
     saveQuote,
     getNextQuoteNumber,
     formatCurrency,
   } = useApp();
+
+  const canGiveDiscounts = currentUser.role === 'admin' || currentUser.permissions?.canGiveDiscounts !== false;
+  const maxAllowedDiscount = currentUser.role === 'admin' ? 100 : (currentUser.permissions?.maxDiscountPercent ?? 100);
+  const canManageProducts = currentUser.role === 'admin' || currentUser.permissions?.canManageProducts !== false;
 
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -713,19 +718,21 @@ export const QuoteEditor: React.FC<QuoteEditorProps> = ({ quoteId, onBack }) => 
                         )}
                       </div>
 
-                      <div className="pt-2 border-t border-slate-100">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setShowCatalogDropdown(false);
-                            setCatalogSearch('');
-                            setIsProductModalOpen(true);
-                          }}
-                          className="w-full py-1 text-center text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center justify-center gap-1"
-                        >
-                          <Plus className="w-3.5 h-3.5" /> Crear Nuevo en Catálogo
-                        </button>
-                      </div>
+                      {canManageProducts && (
+                        <div className="pt-2 border-t border-slate-100">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowCatalogDropdown(false);
+                              setCatalogSearch('');
+                              setIsProductModalOpen(true);
+                            }}
+                            className="w-full py-1 text-center text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center justify-center gap-1 cursor-pointer"
+                          >
+                            <Plus className="w-3.5 h-3.5" /> Crear Nuevo en Catálogo
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -893,18 +900,38 @@ export const QuoteEditor: React.FC<QuoteEditorProps> = ({ quoteId, onBack }) => 
                 )}
               </div>
 
-              {/* Global Discount Option */}
+              {/* Global Discount Option with Admin Access Control */}
               <div className="flex items-center justify-between text-xs text-slate-300">
-                <span className="text-xs">Descuento general adicional (%):</span>
+                <div className="flex flex-col">
+                  <span className="text-xs">Descuento general adicional (%):</span>
+                  {!canGiveDiscounts ? (
+                    <span className="text-[10px] text-amber-400 font-medium">
+                      🔒 No autorizado por el administrador
+                    </span>
+                  ) : maxAllowedDiscount < 100 ? (
+                    <span className="text-[10px] text-slate-400">
+                      Máx. permitido: {maxAllowedDiscount}%
+                    </span>
+                  ) : null}
+                </div>
                 <div className="flex items-center gap-1">
                   <input
                     type="number"
                     step="any"
                     min="0"
-                    max="100"
+                    max={maxAllowedDiscount}
+                    disabled={!canGiveDiscounts}
                     value={discountPercent}
-                    onChange={(e) => setDiscountPercent(parseFloat(e.target.value) || 0)}
-                    className="w-16 px-2 py-1 bg-slate-800 border border-slate-700 rounded-lg text-xs font-mono text-white text-center focus:outline-none"
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value) || 0;
+                      const capped = Math.min(Math.max(0, val), maxAllowedDiscount);
+                      setDiscountPercent(capped);
+                    }}
+                    className={`w-16 px-2 py-1 bg-slate-800 border rounded-lg text-xs font-mono text-white text-center focus:outline-none ${
+                      !canGiveDiscounts
+                        ? 'opacity-40 cursor-not-allowed border-slate-700'
+                        : 'border-slate-700 focus:border-blue-400'
+                    }`}
                   />
                   <span className="text-xs text-slate-400">%</span>
                 </div>

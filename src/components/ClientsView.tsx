@@ -25,7 +25,10 @@ export const ClientsView: React.FC = () => {
     deleteClient,
     startNewQuote,
     formatCurrency,
+    currentUser,
   } = useApp();
+
+  const canDeleteClients = currentUser.role === 'admin' || currentUser.permissions?.canDeleteClients !== false;
 
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -195,18 +198,20 @@ export const ClientsView: React.FC = () => {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => handleEdit(client)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
                         title="Editar cliente"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
-                      <button
-                        onClick={() => handleDelete(client.id, client.name)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                        title="Eliminar cliente"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {canDeleteClients && (
+                        <button
+                          onClick={() => handleDelete(client.id, client.name)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                          title="Eliminar cliente"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
 

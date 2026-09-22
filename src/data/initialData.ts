@@ -1,4 +1,13 @@
-import { Client, Product, Quote, CompanySettings, User, QuoteLayoutSettings } from '../types';
+import { Client, Product, Quote, CompanySettings, User, QuoteLayoutSettings, UserPermissions } from '../types';
+
+export const DEFAULT_COMMERCIAL_PERMISSIONS: UserPermissions = {
+  canManageProducts: true,
+  canDeleteQuotes: true,
+  canDeleteClients: true,
+  canGiveDiscounts: true,
+  maxDiscountPercent: 100,
+  canExportData: true,
+};
 
 export const DEFAULT_LAYOUT_SETTINGS: QuoteLayoutSettings = {
   pagePadding: 28,
@@ -36,9 +45,18 @@ export const initialUsers: User[] = [
     username: 'admin',
     password: 'admin123',
     role: 'admin',
+    status: 'active',
     company: 'Mi Empresa',
     phone: '',
     createdAt: new Date().toISOString(),
+    permissions: {
+      canManageProducts: true,
+      canDeleteQuotes: true,
+      canDeleteClients: true,
+      canGiveDiscounts: true,
+      maxDiscountPercent: 100,
+      canExportData: true,
+    },
   }
 ];
 
