@@ -57,6 +57,26 @@ export const initialUsers: User[] = [
       maxDiscountPercent: 100,
       canExportData: true,
     },
+  },
+  {
+    id: 'user-comercial-default',
+    name: 'Usuario Comercial',
+    email: 'comercial@cotizafacil.com',
+    username: 'comercial',
+    password: 'admin123',
+    role: 'seller',
+    status: 'active',
+    company: 'Mi Empresa',
+    phone: '',
+    createdAt: new Date().toISOString(),
+    permissions: {
+      canManageProducts: true,
+      canDeleteQuotes: false,
+      canDeleteClients: false,
+      canGiveDiscounts: true,
+      maxDiscountPercent: 20,
+      canExportData: true,
+    },
   }
 ];
 

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "user-admin",
+    "name": "Administrador Principal",
+    "email": "admin@cotizafacil.com",
+    "username": "admin",
+    "password": "admin123",
+    "role": "admin",
+    "status": "active",
+    "company": "Soluciones Comerciales Pro S.A. de C.V.",
+    "phone": "+52 (55) 5555-0100",
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "permissions": {
+      "canManageProducts": true,
+      "canDeleteQuotes": true,
+      "canDeleteClients": true,
+      "canGiveDiscounts": true,
+      "maxDiscountPercent": 100,
+      "canExportData": true
+    }
+  },
+  {
+    "id": "user-comercial-default",
+    "name": "Usuario Comercial",
+    "email": "comercial@cotizafacil.com",
+    "username": "comercial",
+    "password": "admin123",
+    "role": "seller",
+    "status": "active",
+    "company": "Soluciones Comerciales Pro S.A. de C.V.",
+    "phone": "+52 (55) 5555-0101",
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "permissions": {
+      "canManageProducts": true,
+      "canDeleteQuotes": false,
+      "canDeleteClients": false,
+      "canGiveDiscounts": true,
+      "maxDiscountPercent": 20,
+      "canExportData": true
+    }
+  },
+  {
+    "id": "user-comercial-2",
+    "name": "María Asesora Comercial",
+    "email": "maria.ventas@miempresa.com",
+    "username": "maria.asesora",
+    "password": "maria123",
+    "role": "seller",
+    "status": "active",
+    "company": "Soluciones Comerciales Pro S.A. de C.V.",
+    "phone": "+52 (55) 5555-0102",
+    "createdAt": "2026-02-01T11:30:00.000Z",
+    "permissions": {
+      "canManageProducts": true,
+      "canDeleteQuotes": false,
+      "canDeleteClients": false,
+      "canGiveDiscounts": true,
+      "maxDiscountPercent": 15,
+      "canExportData": true
+    }
+  }
+]

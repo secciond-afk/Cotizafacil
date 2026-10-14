@@ -126,12 +126,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         const parsed: User[] = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           // Normalize and preserve every user with password, status, and permissions
-          return parsed.map((u) => {
+          const normalized: User[] = parsed.map((u): User => {
             const isAdminUser = u.id === 'user-admin' || u.role === 'admin';
+            const isDefaultComercial = u.id === 'user-comercial-default' || (u.username && u.username.toLowerCase() === 'comercial');
             return {
               ...u,
-              username: u.username || (isAdminUser ? 'admin' : (u.email ? u.email.split('@')[0] : 'comercial')),
-              password: u.password || (isAdminUser ? 'admin123' : '123456'),
+              username: u.username || (isAdminUser ? 'admin' : (isDefaultComercial ? 'comercial' : (u.email ? u.email.split('@')[0] : 'comercial'))),
+              password: u.password || (isAdminUser || isDefaultComercial ? 'admin123' : '123456'),
               status: u.status || 'active',
               permissions: {
                 ...DEFAULT_COMMERCIAL_PERMISSIONS,
@@ -139,6 +140,38 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
               },
             };
           });
+
+          // Ensure default commercial user exists in the database
+          const hasCommercialUser = normalized.some(
+            (u) => (u.username && u.username.toLowerCase() === 'comercial') || u.id === 'user-comercial-default'
+          );
+
+          if (!hasCommercialUser) {
+            const defaultCommercial: User = {
+              id: 'user-comercial-default',
+              name: 'Usuario Comercial',
+              email: 'comercial@cotizafacil.com',
+              username: 'comercial',
+              password: 'admin123',
+              role: 'seller',
+              status: 'active',
+              company: 'Mi Empresa',
+              phone: '',
+              createdAt: new Date().toISOString(),
+              permissions: {
+                ...DEFAULT_COMMERCIAL_PERMISSIONS,
+                maxDiscountPercent: 20,
+              },
+            };
+            normalized.push(defaultCommercial);
+            try {
+              localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(normalized));
+            } catch {
+              // ignore
+            }
+          }
+
+          return normalized;
         }
       }
       return initialUsers;
@@ -563,8 +596,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       };
     }
 
-    // Verify password (fallback to default admin123 or 123456 if none stored)
-    const expectedPassword = matchedUser.password || (matchedUser.role === 'admin' ? 'admin123' : '123456');
+    // Verify password (fallback to default admin123 for admin and comercial, or 123456)
+    const isCommercialDefault = matchedUser.username?.toLowerCase() === 'comercial' || matchedUser.id === 'user-comercial-default';
+    const expectedPassword = matchedUser.password || (matchedUser.role === 'admin' || isCommercialDefault ? 'admin123' : '123456');
     if (cleanPass !== expectedPassword) {
       return { success: false, message: 'Contraseña incorrecta. Por favor verifica tus credenciales.' };
     }

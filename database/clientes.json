@@ -1,0 +1,38 @@
+[
+  {
+    "id": "cli-1",
+    "userId": "user-admin",
+    "name": "Corporativo Industrial del Norte S.A.",
+    "contactPerson": "Ing. Roberto Garza Sada",
+    "taxId": "CIN850412AB1",
+    "email": "compras@corporativonorte.com",
+    "phone": "+52 (81) 8200-4400",
+    "address": "Av. Constitución 1450, Piso 8, Monterrey, N.L.",
+    "notes": "Cliente corporativo AAA. Requiere facturación electrónica inmediata.",
+    "createdAt": "2026-01-10T11:00:00.000Z"
+  },
+  {
+    "id": "cli-2",
+    "userId": "user-admin",
+    "name": "Soluciones Logísticas del Bajío",
+    "contactPerson": "Lic. Andrea Martínez Peña",
+    "taxId": "SLB120915XY3",
+    "email": "amartinez@logisticabajio.mx",
+    "phone": "+52 (442) 234-5678",
+    "address": "Parque Industrial Bernardo Quintana Nave 12, Querétaro, Qro.",
+    "notes": "Pagos programados a 15 días tras entrega de reporte.",
+    "createdAt": "2026-01-12T14:30:00.000Z"
+  },
+  {
+    "id": "cli-3",
+    "userId": "user-comercial-default",
+    "name": "Distribuidora Médica Especializada",
+    "contactPerson": "Dr. Fernando Morales Castro",
+    "taxId": "DME180320KL9",
+    "email": "direccion@distribuidoramedica.com",
+    "phone": "+52 (55) 5432-8765",
+    "address": "Insurgentes Sur 1898 Int. 402, CDMX",
+    "notes": "Prospecto calificado por Usuario Comercial.",
+    "createdAt": "2026-01-20T16:00:00.000Z"
+  }
+]

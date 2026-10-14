@@ -15,7 +15,7 @@ export interface User {
   email: string;
   username?: string;
   password?: string;
-  role: 'admin' | 'user';
+  role: 'admin' | 'user' | 'seller';
   status?: 'active' | 'inactive'; // Permite habilitar o deshabilitar el acceso al sistema
   company?: string;
   phone?: string;

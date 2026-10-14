@@ -1,0 +1,72 @@
+[
+  {
+    "id": "prod-1",
+    "userId": "user-admin",
+    "name": "Consultoría Estratégica Empresarial",
+    "sku": "SRV-CONS-01",
+    "category": "Servicios Profesionales",
+    "description": "Diagnóstico operativo, análisis financiero y diseño de plan de optimización de procesos para negocio de 40 horas.",
+    "unit": "servicio",
+    "unitPrice": 12500,
+    "taxRate": 16,
+    "applyTax": true,
+    "discountPercent": 0,
+    "createdAt": "2026-01-05T09:00:00.000Z"
+  },
+  {
+    "id": "prod-2",
+    "userId": "user-admin",
+    "name": "Desarrollo Web & Plataforma E-Commerce",
+    "sku": "DEV-WEB-PRO",
+    "category": "Tecnología",
+    "description": "Diseño web a medida, pasarela de pago, catálogo de productos, optimización SEO y panel de administración.",
+    "unit": "proyecto",
+    "unitPrice": 28000,
+    "taxRate": 16,
+    "applyTax": true,
+    "discountPercent": 5,
+    "createdAt": "2026-01-05T09:15:00.000Z"
+  },
+  {
+    "id": "prod-3",
+    "userId": "user-admin",
+    "name": "Póliza Mensual de Soporte y Mantenimiento TI",
+    "sku": "POL-SOP-MES",
+    "category": "Mantenimiento",
+    "description": "Soporte técnico remoto prioritario 24/7, respaldos automáticos y monitoreo proactivo de servidores.",
+    "unit": "mes",
+    "unitPrice": 4500,
+    "taxRate": 16,
+    "applyTax": true,
+    "discountPercent": 0,
+    "createdAt": "2026-01-05T09:30:00.000Z"
+  },
+  {
+    "id": "prod-4",
+    "userId": "user-admin",
+    "name": "Licencia Anual Software de Gestión Cloud",
+    "sku": "LIC-SFT-ANUAL",
+    "category": "Software",
+    "description": "Acceso ilimitado para hasta 10 usuarios con actualizaciones incluidas, almacenamiento en la nube y reportes avanzados.",
+    "unit": "licencia",
+    "unitPrice": 16800,
+    "taxRate": 16,
+    "applyTax": true,
+    "discountPercent": 10,
+    "createdAt": "2026-01-05T09:45:00.000Z"
+  },
+  {
+    "id": "prod-5",
+    "userId": "user-admin",
+    "name": "Taller de Capacitación en Ventas y Cierre",
+    "sku": "CAP-VTA-02",
+    "category": "Capacitación",
+    "description": "Programa intensivo de 16 horas para equipos comerciales, técnicas de negociación, seguimiento y fidelización.",
+    "unit": "curso",
+    "unitPrice": 8900,
+    "taxRate": 16,
+    "applyTax": true,
+    "discountPercent": 0,
+    "createdAt": "2026-01-05T10:00:00.000Z"
+  }
+]

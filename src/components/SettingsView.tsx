@@ -17,7 +17,11 @@ import {
   Image as ImageIcon,
   ShieldCheck,
   DollarSign,
-  Sliders
+  Sliders,
+  Archive,
+  WifiOff,
+  Terminal,
+  Database
 } from 'lucide-react';
 
 const COLOR_PRESETS = [
@@ -731,6 +735,81 @@ export const SettingsView: React.FC = () => {
             <Download className="w-4 h-4 text-blue-600" />
             Copia de Seguridad y Restauración de Datos
           </h3>
+
+          {/* Offline ZIP Application Package - Only visible to Administrator */}
+          {currentUser.role === 'admin' && (
+            <div className="p-5 sm:p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 rounded-3xl text-white shadow-xl space-y-4 border border-slate-700/60">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-400 shadow-inner shrink-0">
+                    <Archive className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h4 className="font-extrabold text-base sm:text-lg text-white">
+                        Paquete de Aplicación Completa Offline (.ZIP)
+                      </h4>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-indigo-500/30 text-indigo-200 border border-indigo-400/40 flex items-center gap-1">
+                        <ShieldCheck className="w-3 h-3 text-indigo-300" /> Exclusivo Administrador
+                      </span>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center gap-1">
+                        <WifiOff className="w-3 h-3" /> 100% Sin Conexión
+                      </span>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-500/20 text-blue-300 border border-blue-400/30 flex items-center gap-1">
+                        <Database className="w-3 h-3" /> Con Bases de Datos
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                      Descarga el código fuente completo, distribución precompilada, bases de datos de ejemplo (usuarios comerciales y cotizaciones), servidor autónomo y lanzadores automáticos para ejecutar localmente en tu computadora.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs">
+                  <div className="font-bold text-slate-200 flex items-center gap-1.5 mb-1">
+                    <Terminal className="w-3.5 h-3.5 text-indigo-400" /> Windows (1 Clic)
+                  </div>
+                  <p className="text-[11px] text-slate-400">Doble clic en <code className="text-indigo-300 bg-slate-900/60 px-1 py-0.5 rounded">INICIAR_LOCAL.bat</code></p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs">
+                  <div className="font-bold text-slate-200 flex items-center gap-1.5 mb-1">
+                    <Terminal className="w-3.5 h-3.5 text-emerald-400" /> Mac / Linux
+                  </div>
+                  <p className="text-[11px] text-slate-400">Ejecutar <code className="text-emerald-300 bg-slate-900/60 px-1 py-0.5 rounded">./iniciar_local.sh</code></p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs">
+                  <div className="font-bold text-slate-200 flex items-center gap-1.5 mb-1">
+                    <ShieldCheck className="w-3.5 h-3.5 text-amber-400" /> Accesos Incluidos
+                  </div>
+                  <p className="text-[11px] text-slate-400"><strong className="text-slate-200">admin</strong> (admin123) / <strong className="text-slate-200">comercial</strong> (admin123)</p>
+                </div>
+              </div>
+
+              <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
+                <a
+                  href="/cotizafacil-pro-offline.zip"
+                  download="CotizaFacil_Pro_Offline.zip"
+                  className="w-full sm:w-auto flex-1 px-5 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2.5 shadow-lg shadow-blue-900/40 transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
+                >
+                  <Download className="w-4 h-4" />
+                  Descargar Archivo ZIP Completo (.ZIP)
+                </a>
+
+                <button
+                  type="button"
+                  onClick={exportBackupJSON}
+                  className="w-full sm:w-auto px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                >
+                  <Database className="w-3.5 h-3.5 text-indigo-400" />
+                  Exportar Base de Datos Actual (.json)
+                </button>
+              </div>
+            </div>
+          )}
 
           {importStatus && (
             <div
