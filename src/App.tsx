@@ -10,11 +10,12 @@ import { ClientsView } from './components/ClientsView';
 import { ProductsView } from './components/ProductsView';
 import { UsersView } from './components/UsersView';
 import { SettingsView } from './components/SettingsView';
+import { SalesPageView } from './components/SalesPageView';
 import { QuoteEditor } from './components/QuoteEditor';
 import { UserGuideModal } from './components/UserGuideModal';
 
 const MainLayout: React.FC = () => {
-  const { isAuthenticated, activeTab, editingQuoteId, setActiveTab } = useApp();
+  const { isAuthenticated, activeTab, editingQuoteId, setActiveTab, currentUser } = useApp();
 
   if (!isAuthenticated) {
     return <LoginView />;
@@ -36,6 +37,7 @@ const MainLayout: React.FC = () => {
         {activeTab === 'products' && <ProductsView />}
         {activeTab === 'users' && <UsersView />}
         {activeTab === 'settings' && <SettingsView />}
+        {activeTab === 'sales-page' && currentUser.role === 'admin' && <SalesPageView />}
         {activeTab === 'editor' && (
           <QuoteEditor
             quoteId={editingQuoteId}

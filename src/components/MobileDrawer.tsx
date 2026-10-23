@@ -17,7 +17,8 @@ import {
   Lock,
   LogOut,
   KeyRound,
-  BookOpen
+  BookOpen,
+  Globe
 } from 'lucide-react';
 
 export const MobileDrawer: React.FC = () => {
@@ -142,7 +143,10 @@ export const MobileDrawer: React.FC = () => {
                 { id: 'quotes', label: 'Historial de Cotizaciones', icon: FileText },
                 { id: 'clients', label: 'Base de Clientes', icon: Users },
                 { id: 'products', label: 'Catálogo de Productos', icon: Package },
-                ...(currentUser.role === 'admin' ? [{ id: 'users', label: 'Base de Usuarios', icon: Lock }] : []),
+                ...(currentUser.role === 'admin' ? [
+                  { id: 'users', label: 'Base de Usuarios', icon: Lock },
+                  { id: 'sales-page', label: 'Página de Ventas', icon: Globe },
+                ] : []),
                 { id: 'settings', label: 'Configuración & Marca', icon: Settings },
               ].map((item) => {
                 const Icon = item.icon;

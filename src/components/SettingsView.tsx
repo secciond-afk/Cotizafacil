@@ -21,7 +21,8 @@ import {
   Archive,
   WifiOff,
   Terminal,
-  Database
+  Database,
+  Globe
 } from 'lucide-react';
 
 const COLOR_PRESETS = [
@@ -45,6 +46,7 @@ export const SettingsView: React.FC = () => {
     parseBackupJSON,
     importBackupData,
     clearAllUserData,
+    setActiveTab: setGlobalActiveTab,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'company' | 'branding' | 'layout' | 'tax' | 'texts' | 'notifications' | 'backup'>('company');
@@ -801,11 +803,20 @@ export const SettingsView: React.FC = () => {
 
                 <button
                   type="button"
+                  onClick={() => setGlobalActiveTab('sales-page')}
+                  className="w-full sm:w-auto px-4 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-indigo-900/30 transition-colors cursor-pointer"
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  Página de Ventas Web
+                </button>
+
+                <button
+                  type="button"
                   onClick={exportBackupJSON}
                   className="w-full sm:w-auto px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
                 >
                   <Database className="w-3.5 h-3.5 text-indigo-400" />
-                  Exportar Base de Datos Actual (.json)
+                  Exportar BD (.json)
                 </button>
               </div>
             </div>

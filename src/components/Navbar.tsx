@@ -101,7 +101,10 @@ export const Navbar: React.FC = () => {
             { id: 'quotes', label: 'Cotizaciones' },
             { id: 'clients', label: 'Clientes' },
             { id: 'products', label: 'Catálogo' },
-            ...(currentUser.role === 'admin' ? [{ id: 'users', label: 'Usuarios' }] : []),
+            ...(currentUser.role === 'admin' ? [
+              { id: 'users', label: 'Usuarios' },
+              { id: 'sales-page', label: 'Página de Ventas' },
+            ] : []),
             { id: 'settings', label: 'Configuración' },
           ].map((item) => (
             <button

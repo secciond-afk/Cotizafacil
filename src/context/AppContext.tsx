@@ -29,7 +29,7 @@ interface AppContextType {
   unreadNotificationsCount: number;
   
   // Navigation & UI state
-  activeTab: 'dashboard' | 'quotes' | 'clients' | 'products' | 'users' | 'settings' | 'editor';
+  activeTab: 'dashboard' | 'quotes' | 'clients' | 'products' | 'users' | 'settings' | 'editor' | 'sales-page';
   editingQuoteId: string | null;
   selectedQuoteForPreview: Quote | null;
   selectedQuoteForPrint: Quote | null;
@@ -37,7 +37,7 @@ interface AppContextType {
   isUserGuideOpen: boolean;
   
   // Navigation actions
-  setActiveTab: (tab: 'dashboard' | 'quotes' | 'clients' | 'products' | 'users' | 'settings' | 'editor') => void;
+  setActiveTab: (tab: 'dashboard' | 'quotes' | 'clients' | 'products' | 'users' | 'settings' | 'editor' | 'sales-page') => void;
   setEditingQuoteId: (id: string | null) => void;
   setSelectedQuoteForPreview: (quote: Quote | null) => void;
   setSelectedQuoteForPrint: (quote: Quote | null) => void;
